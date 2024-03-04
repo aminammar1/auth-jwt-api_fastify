@@ -1,0 +1,29 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server",
+    "dev": "nodemon server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cookie": "^6.0.0",
+    "@fastify/cors": "^7.0.0",
+    "@fastify/jwt": "^5.0.0",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.3.1",
+    "fastify": "^3.29.5",
+    "jsonwebtoken": "^9.0.1",
+    "mongodb": "^6.4.0",
+    "nodemon": "^3.1.0",
+    "path": "^0.12.7"
+  },
+  "engines": {
+    "node": ">=14.20.1"
+  }
+}
