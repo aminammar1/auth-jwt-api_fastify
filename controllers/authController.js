@@ -28,7 +28,9 @@ const register = async (req, res) => {
       updateAt: new Date(),
     };
     console.log("New User:", newUser);
+    
     const result = await users.insertOne(newUser);
+    
     console.log("Insert Result:", result);
 
     const insertedUser = result.ops[0];
@@ -162,7 +164,7 @@ const refresh = async (req, res) => {
           { expiresIn: "15m" }
         );
 
-        res.json({ accessToken });
+        res.send({ accessToken });
       } catch (error) {
         console.error("Error refreshing token:", error);
         res.status(500).send({ message: "Internal Server Error" });
@@ -173,7 +175,7 @@ const refresh = async (req, res) => {
 
 const logout = (req, res) => {
   const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(204); //No content
+  if (!cookies?.jwt) return res.sendStatus(204);
 
   res.clearCookie("jwt", {
     httpOnly: true,
@@ -184,9 +186,104 @@ const logout = (req, res) => {
   res.send({ message: "success log out from the account ! " });
 };
 
+const generateRandomCode = () => {
+  return Math.floor(100000 + Math.random() * 900000);
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res
+      .status(400)
+      .send({ message: "Email is required for password reset" });
+  }
+
+  const client = getClient();
+  const users = client.db().collection("users");
+
+  try {
+    const foundUser = await users.findOne({ email });
+
+    if (!foundUser) {
+      return res
+        .status(404)
+        .send({ message: "User not found with the provided email" });
+    }
+
+    const resetCode = generateRandomCode();
+    const hashedCode = await bcrypt.hash(resetCode.toString(), 10);
+
+    foundUser.resetPasswordCode = hashedCode;
+    foundUser.resetPasswordExpires = Date.now() + 3600000;
+
+    await users.updateOne({ email }, { $set: foundUser });
+
+    res.send({
+      message:
+        "Reset code generated successfully. Use this code to reset your password.",
+      resetCode,
+    });
+  } catch (error) {
+    console.error("Error generating reset code:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { email, resetCode, newPassword } = req.body;
+
+  if (!email || !resetCode || !newPassword) {
+    return res.status(400).send({
+      message:
+        "Email, resetCode, and newPassword are required for password reset",
+    });
+  }
+
+  const client = getClient();
+  const users = client.db().collection("users");
+
+  try {
+    const foundUser = await users.findOne({ email });
+
+    if (!foundUser) {
+      return res
+        .status(404)
+        .send({ message: "User not found with the provided email" });
+    }
+
+    const isValidCode = await bcrypt.compare(
+      resetCode.toString(),
+      foundUser.resetPasswordCode
+    );
+
+    if (!isValidCode || Date.now() > foundUser.resetPasswordExpires) {
+      return res.status(401).send({ message: "Invalid or expired reset code" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    foundUser.password = hashedPassword;
+
+    await users.updateOne(
+      { email },
+      {
+        $set: { password: hashedPassword },
+        $unset: { resetPasswordCode: "", resetPasswordExpires: "" },
+      }
+    );
+
+    res.send({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   register,
   login,
   refresh,
   logout,
+  forgotPassword,
+  resetPassword,
 };

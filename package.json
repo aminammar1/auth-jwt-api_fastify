@@ -15,12 +15,17 @@
     "@fastify/cors": "^7.0.0",
     "@fastify/jwt": "^5.0.0",
     "bcrypt": "^5.1.1",
-    "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
     "fastify": "^3.29.5",
+    "fastify-passport": "^0.6.0",
+    "fastify-secure-session": "^3.2.0",
     "jsonwebtoken": "^9.0.1",
     "mongodb": "^6.4.0",
     "nodemon": "^3.1.0",
+    "passport": "^0.7.0",
+    "passport-apple": "^2.0.2",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.1",
     "path": "^0.12.7"
   },
   "engines": {

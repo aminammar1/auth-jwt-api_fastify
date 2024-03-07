@@ -1,4 +1,4 @@
-const { getClient } = require("../config/dbconn");
+const { getClient } = require("../config/dbConn");
 
 const getAllUsers = async (req, res) => {
   const db = getClient().db();
