@@ -1,9 +1,9 @@
 require("dotenv").config();
 const fastify = require("fastify")();
-const fastifyPassport = require("fastify-passport");
+const fastifyPassport = require("@fastify/passport");
 const { connectDB } = require("./config/dbConn");
 const cors = require("@fastify/cors");
-const fastifySecureSession = require("fastify-secure-session");
+const fastifySecureSession = require("@fastify/secure-session");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
